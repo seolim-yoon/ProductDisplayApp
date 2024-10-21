@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ProductDisplayApp"
 include(":app")
- 
+include(":data")
+include(":domain")
