@@ -9,7 +9,7 @@ data class Contents(
     @SerialName("banners")
     val banners: List<Banner?>? = listOf(),
     @SerialName("goods")
-    val goods: List<Good?>? = listOf(),
+    val goods: List<Goods?>? = listOf(),
     @SerialName("styles")
     val styles: List<Style?>? = listOf(),
     @SerialName("type")
@@ -30,7 +30,7 @@ data class Contents(
     )
 
     @Serializable
-    data class Good(
+    data class Goods(
         @SerialName("brandName")
         val brandName: String? = "",
         @SerialName("hasCoupon")

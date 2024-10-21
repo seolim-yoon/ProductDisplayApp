@@ -1,6 +1,6 @@
 package com.example.data.di
 
-import com.example.data.api.ContentInfoService
+import com.example.data.api.ComponentInfoService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -50,6 +50,6 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun providesService(retrofit: Retrofit): ContentInfoService =
-        retrofit.create(ContentInfoService::class.java)
+    fun providesService(retrofit: Retrofit): ComponentInfoService =
+        retrofit.create(ComponentInfoService::class.java)
 }
