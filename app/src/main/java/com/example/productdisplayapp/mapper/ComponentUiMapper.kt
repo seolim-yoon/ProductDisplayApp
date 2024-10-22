@@ -29,9 +29,10 @@ class ComponentUiMapper @Inject constructor() {
         }
 
     private fun mapToContentUiModelList(contentList: List<ContentEntity>): List<ContentUiModel> =
-        contentList.map { content ->
+        contentList.mapIndexed { index, content ->
             when(content) {
                 is BannerEntity -> BannerUiModel(
+                    id = index,
                     linkURL = content.linkURL,
                     thumbnailURL = content.thumbnailURL,
                     title = content.title,
@@ -39,6 +40,7 @@ class ComponentUiMapper @Inject constructor() {
                     keyword = content.keyword
                 )
                 is GoodsEntity -> GoodsUiModel(
+                    id = index,
                     linkURL = content.linkURL,
                     thumbnailURL = content.thumbnailURL,
                     brandName = content.brandName,
@@ -47,6 +49,7 @@ class ComponentUiMapper @Inject constructor() {
                     hasCoupon = content.hasCoupon,
                 )
                 is StyleEntity -> StyleUiModel(
+                    id = index,
                     linkURL = content.linkURL,
                     thumbnailURL = content.thumbnailURL
                 )

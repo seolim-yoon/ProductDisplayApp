@@ -3,6 +3,7 @@ package com.example.productdisplayapp.uimodel
 sealed class ContentUiModel
 
 data class BannerUiModel(
+    val id: Int,
     val linkURL: String,
     val thumbnailURL: String,
     val title: String,
@@ -11,6 +12,7 @@ data class BannerUiModel(
 ): ContentUiModel()
 
 data class GoodsUiModel(
+    val id: Int,
     val linkURL: String,
     val thumbnailURL: String,
     val brandName: String,
@@ -20,6 +22,7 @@ data class GoodsUiModel(
 ): ContentUiModel()
 
 data class StyleUiModel(
+    val id: Int,
     val linkURL: String,
     val thumbnailURL: String
 ): ContentUiModel()
