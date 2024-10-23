@@ -1,29 +1,33 @@
 package com.example.productdisplayapp.uimodel
 
-sealed class ContentUiModel
+sealed interface ContentUiModel {
+    val id: Int
+    val linkURL: String
+    val thumbnailURL: String
+}
 
 data class BannerUiModel(
-    val id: Int,
-    val linkURL: String,
-    val thumbnailURL: String,
+    override val id: Int,
+    override val linkURL: String,
+    override val thumbnailURL: String,
     val title: String,
     val description: String,
     val keyword: String
-): ContentUiModel()
+): ContentUiModel
 
 data class GoodsUiModel(
-    val id: Int,
-    val linkURL: String,
-    val thumbnailURL: String,
+    override val id: Int,
+    override val linkURL: String,
+    override val thumbnailURL: String,
     val brandName: String,
     val price: Int,
     val saleRate: Int,
     val hasCoupon: Boolean
-): ContentUiModel()
+): ContentUiModel
 
 data class StyleUiModel(
-    val id: Int,
-    val linkURL: String,
-    val thumbnailURL: String
-): ContentUiModel()
+    override val id: Int,
+    override val linkURL: String,
+    override val thumbnailURL: String,
+): ContentUiModel
 

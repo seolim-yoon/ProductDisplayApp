@@ -7,6 +7,7 @@ import com.example.domain.model.FooterEntity
 import com.example.domain.model.GoodsEntity
 import com.example.domain.model.HeaderEntity
 import com.example.domain.model.StyleEntity
+import com.example.domain.util.ContentType
 import com.example.productdisplayapp.uimodel.BannerUiModel
 import com.example.productdisplayapp.uimodel.ComponentUiModel
 import com.example.productdisplayapp.uimodel.ContentUiModel
@@ -17,12 +18,17 @@ import com.example.productdisplayapp.uimodel.StyleUiModel
 import javax.inject.Inject
 
 class ComponentUiMapper @Inject constructor() {
-    
+
     fun mapToComponentUiModel(componentList: List<ComponentEntity>): List<ComponentUiModel> =
         componentList.map { component ->
             ComponentUiModel(
                 contentType = component.contentType,
-                contentList = mapToContentUiModelList(component.contentList),
+                contentList = mapToContentUiModelList(component.contentList).run {
+                    when (component.contentType) {
+                        ContentType.GRID -> take(6)
+                        else -> this
+                    }
+                },
                 headerUiModel = mapToHeaderUiModel(component.headerEntity),
                 footerUiModel = mapToFooterUiModel(component.footerEntity)
             )

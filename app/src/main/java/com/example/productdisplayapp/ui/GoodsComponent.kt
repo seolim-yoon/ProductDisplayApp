@@ -1,6 +1,7 @@
 package com.example.productdisplayapp.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,17 +24,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.productdisplayapp.R
+import com.example.productdisplayapp.uimodel.ContentUiModel
 import com.example.productdisplayapp.uimodel.GoodsUiModel
 
 @Composable
 fun GridComponent(
     goodsList: List<GoodsUiModel>,
+    onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -49,7 +53,10 @@ fun GridComponent(
             items = goodsList
         ) { goods ->
             GoodsItem(
-                goods = goods
+                goods = goods,
+                onGoodsClick = {
+                    onContentClick(goods.linkURL)
+                }
             )
         }
     }
@@ -58,6 +65,7 @@ fun GridComponent(
 @Composable
 fun ScrollComponent(
     goodsList: List<GoodsUiModel>,
+    onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -73,6 +81,9 @@ fun ScrollComponent(
         ) { goods ->
             GoodsItem(
                 goods = goods,
+                onGoodsClick = {
+                    onContentClick(goods.linkURL)
+                },
                 modifier = Modifier.fillParentMaxWidth(1f / 2.7f)
             )
         }
@@ -82,10 +93,13 @@ fun ScrollComponent(
 @Composable
 fun GoodsItem(
     goods: GoodsUiModel,
+    onGoodsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier.clickable {
+            onGoodsClick()
+        }
     ) {
         GoodsImage(
             goods = goods
@@ -105,11 +119,8 @@ fun GoodsImage(
     Box(
         modifier = modifier
     ) {
-        AsyncImage(
-            model = goods.thumbnailURL,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxWidth()
+        ContentImageItem(
+            content = goods
         )
 
         if (goods.hasCoupon) {
@@ -119,7 +130,7 @@ fun GoodsImage(
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .background(
-                        color = Color.Blue
+                        color = colorResource(R.color.blue)
                     )
                     .align(Alignment.BottomStart)
                     .padding(horizontal = 5.dp, vertical = 2.dp)
@@ -141,7 +152,9 @@ fun GoodsInfo(
         modifier = Modifier.padding(top = 8.dp)
     )
 
-    Row {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = stringResource(R.string.price_won, goods.price),
             color = Color.Black,
@@ -151,13 +164,30 @@ fun GoodsInfo(
 
         Text(
             text = stringResource(R.string.sale_rate, goods.saleRate),
-            color = Color.Red,
+            color = colorResource(R.color.dark_red),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(end = 5.dp)
         )
     }
 }
 
+@Composable
+fun ContentImageItem(
+    content: ContentUiModel,
+    onImageClick:() -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    AsyncImage(
+        model = content.thumbnailURL,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onImageClick()
+            }
+    )
+}
 
 @Composable
 @Preview(showBackground = true)
@@ -173,6 +203,7 @@ fun PreviewGoodsItem() {
     )
 
     GoodsItem(
-        goods = goods
+        goods = goods,
+        onGoodsClick = {}
     )
 }

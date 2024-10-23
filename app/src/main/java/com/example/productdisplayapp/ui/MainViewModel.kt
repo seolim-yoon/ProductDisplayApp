@@ -13,7 +13,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 data class ComponentUiState(
-    val keyword: String = "",
     val components: List<ComponentUiModel> = listOf()
 ) : MavericksState
 

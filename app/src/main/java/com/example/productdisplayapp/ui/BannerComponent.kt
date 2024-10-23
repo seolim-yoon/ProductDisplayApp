@@ -3,6 +3,7 @@ package com.example.productdisplayapp.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import com.example.productdisplayapp.uimodel.BannerUiModel
 @Composable
 fun BannerComponent(
     bannerList: List<BannerUiModel>,
+    onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(pageCount = { bannerList.size })
@@ -46,6 +48,9 @@ fun BannerComponent(
             bannerList.getOrNull(page)?.let { banner ->
                 BannerItem(
                     banner = banner,
+                    onBannerClick = {
+                        onContentClick(banner.linkURL)
+                    }
                 )
             }
         }
@@ -61,10 +66,13 @@ fun BannerComponent(
 @Composable
 fun BannerItem(
     banner: BannerUiModel,
+    onBannerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier.clickable {
+            onBannerClick()
+        }
     ) {
         Image(
             rememberAsyncImagePainter(
@@ -98,7 +106,7 @@ fun BannerTitle(
         Text(
             text = title,
             color = Color.White,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
 
@@ -109,7 +117,7 @@ fun BannerTitle(
         Text(
             text = description,
             color = Color.White,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall,
         )
     }
 }
@@ -144,6 +152,7 @@ fun PreviewBannerItem() {
         keyword = "세일"
     )
     BannerItem(
-        banner
+        banner = banner,
+        onBannerClick = {}
     )
 }
