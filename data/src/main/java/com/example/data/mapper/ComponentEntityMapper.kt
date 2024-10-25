@@ -12,6 +12,7 @@ import com.example.domain.model.GoodsEntity
 import com.example.domain.model.HeaderEntity
 import com.example.domain.model.StyleEntity
 import com.example.domain.util.ContentType
+import com.example.domain.util.FooterType
 import javax.inject.Inject
 
 class ComponentEntityMapper @Inject constructor() {
@@ -46,7 +47,7 @@ class ComponentEntityMapper @Inject constructor() {
         FooterEntity(
             title = footer?.title.orEmpty(),
             iconURL = footer?.iconURL.orEmpty(),
-            footerType = footer?.type.orEmpty() // TODO : 타입
+            footerType = FooterType.fromValue(footer?.type.orEmpty())
         )
 
     private fun mapToBannerEntityList(bannerList: List<Contents.Banner?>?): List<BannerEntity> =

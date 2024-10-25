@@ -33,6 +33,7 @@ import coil.compose.AsyncImage
 import com.example.productdisplayapp.R
 import com.example.productdisplayapp.uimodel.ContentUiModel
 import com.example.productdisplayapp.uimodel.GoodsUiModel
+import com.example.productdisplayapp.util.GRID_COLUMN_DEFAULT
 
 @Composable
 fun GridComponent(
@@ -41,7 +42,7 @@ fun GridComponent(
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        columns = GridCells.Fixed(GRID_COLUMN_DEFAULT),
         contentPadding = PaddingValues(15.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier.heightIn(max = 1000.dp)
@@ -120,7 +121,8 @@ fun GoodsImage(
         modifier = modifier
     ) {
         ContentImageItem(
-            content = goods
+            content = goods,
+            modifier = Modifier.fillMaxWidth()
         )
 
         if (goods.hasCoupon) {
@@ -182,7 +184,6 @@ fun ContentImageItem(
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = modifier
-            .fillMaxWidth()
             .clickable {
                 onImageClick()
             }

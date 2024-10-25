@@ -23,12 +23,7 @@ class ComponentUiMapper @Inject constructor() {
         componentList.map { component ->
             ComponentUiModel(
                 contentType = component.contentType,
-                contentList = mapToContentUiModelList(component.contentList).run {
-                    when (component.contentType) {
-                        ContentType.GRID -> take(6)
-                        else -> this
-                    }
-                },
+                contentList = mapToContentUiModelList(component.contentList),
                 headerUiModel = mapToHeaderUiModel(component.headerEntity),
                 footerUiModel = mapToFooterUiModel(component.footerEntity)
             )
@@ -73,6 +68,6 @@ class ComponentUiMapper @Inject constructor() {
         FooterUiModel(
             title = footerEntity.title,
             iconURL = footerEntity.iconURL,
-            footerType = footerEntity.footerType // TODO : 타입
+            footerType = footerEntity.footerType
         )
 }
