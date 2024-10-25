@@ -27,9 +27,7 @@ interface ComponentUiEffect {
 }
 
 data class ComponentUiState(
-    val defaultDisplayGridItemCount: Int = GRID_COLUMN_DEFAULT * GRID_ROW_DEFAULT,
-    val defaultDisplayStyleItemCount: Int = GRID_COLUMN_DEFAULT * GRID_ROW_DEFAULT,
-    val components: List<ComponentUiModel> = listOf()
+    val displayComponents: List<ComponentUiModel> = listOf()
 ) : MavericksState
 
 class MainViewModel@AssistedInject constructor(
@@ -37,6 +35,9 @@ class MainViewModel@AssistedInject constructor(
     private val getComponentListUseCase: GetComponentListUseCase,
     private val componentUiMapper: ComponentUiMapper
 ) : MavericksViewModel<ComponentUiState>(initialState) {
+
+    private val defaultDisplayItemCount: Int = GRID_COLUMN_DEFAULT * GRID_ROW_DEFAULT
+    private val componentList: MutableList<ComponentUiModel> = mutableListOf()
 
     private val _effect : Channel<ComponentUiEffect> = Channel()
     val effect = _effect.receiveAsFlow()
@@ -51,73 +52,72 @@ class MainViewModel@AssistedInject constructor(
                 .catch { e ->
                     _effect.send(ComponentUiEffect.ShowToastMsg(errorMsg = e.message.orEmpty()))
                 }
-                .execute {
-                    when(it) {
-                        is Success -> copy(components = componentUiMapper.mapToComponentUiModel(it()))
+                .execute { async ->
+                    val components = componentUiMapper.mapToComponentUiModel(async() ?: listOf())
+                    when (async) {
+                        is Success -> {
+                            componentList.addAll(components)
+                            copy(
+                                displayComponents = components.map { component ->
+                                    when (component.contentType) {
+                                        ContentType.GRID, ContentType.STYLE -> component.copy(
+                                            contentList = component.contentList.take(defaultDisplayItemCount)
+                                        )
+                                        else -> component
+                                    }
+                                }
+                            )
+                        }
+
                         is Fail -> {
-                            _effect.trySend(ComponentUiEffect.ShowToastMsg(errorMsg = it.error.message.orEmpty()))
+                            _effect.trySend(ComponentUiEffect.ShowToastMsg(errorMsg = async.error.message.orEmpty()))
                             copy()
                         }
+
                         else -> copy()
                     }
-                 }
+                }
         }
     }
 
     fun refreshComponentList(type: ContentType) {
         withState { state ->
-            val shuffledComponents = state.components.map { component ->
-                component.takeIf { it.contentType == type }
-                    ?.copy(contentList = component.contentList.shuffled())
-                    ?: component
+            val shuffledComponents = state.displayComponents.map { component ->
+                if (component.contentType == type) {
+                    component.copy(
+                        contentList = component.contentList.shuffled()
+                    )
+                } else {
+                    component
+                }
             }
             setState {
-                copy(components = shuffledComponents)
+                copy(displayComponents = shuffledComponents)
             }
         }
     }
 
     fun loadMoreComponentList(type: ContentType) {
         withState { state ->
-            val currentComponent = state.components.find { it.contentType == type }
-            val currentContentListSize = currentComponent?.contentList?.size ?: 0
+            val displayContentListSize = state.displayComponents.find { it.contentType == type }?.contentList?.size ?: 0
+            val updateDisplayContentListSize = displayContentListSize + GRID_COLUMN_DEFAULT
 
-            val updateDisplayItemCount =
-                when (type) {
-                    ContentType.GRID -> { state.defaultDisplayGridItemCount }
-                    ContentType.STYLE -> { state.defaultDisplayStyleItemCount }
-                    else -> { 0 }
-                } + GRID_COLUMN_DEFAULT
+            val allContentList = componentList.find { it.contentType == type }?.contentList
 
-            val updateFooterTypeComponents =
-                state.components.map { component ->
-                    if (component.contentType == type && updateDisplayItemCount >= currentContentListSize) {
-                        component.copy(
-                            footerUiModel = component.footerUiModel.copy(footerType = FooterType.NONE)
-                        )
-                    } else {
-                        component
-                    }
-                }
+            val displayComponents = state.displayComponents.map { component ->
+                if (component.contentType == type) {
+                    component.copy(
+                        contentList = allContentList?.take(updateDisplayContentListSize) ?: listOf(),
+                        footerUiModel = if (updateDisplayContentListSize >= (allContentList?.size ?: 0)) {
+                            component.footerUiModel.copy(footerType = FooterType.NONE)
+                        } else component.footerUiModel
+                    )
+                } else
+                    component
+            }
 
             setState {
-                when(type) {
-                    ContentType.GRID -> {
-                        copy(
-                            components = updateFooterTypeComponents,
-                            defaultDisplayGridItemCount = updateDisplayItemCount,
-                        )
-                    }
-                    ContentType.STYLE -> {
-                        copy(
-                            components = updateFooterTypeComponents,
-                            defaultDisplayStyleItemCount = updateDisplayItemCount
-                        )
-                    }
-                    else -> {
-                        copy()
-                    }
-                }
+              copy(displayComponents = displayComponents)
             }
         }
     }

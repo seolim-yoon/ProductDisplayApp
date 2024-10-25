@@ -24,30 +24,33 @@ fun StyleComponent(
     onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Column(
         modifier = modifier.padding(15.dp)
     ) {
-        Row(
-            modifier = Modifier.aspectRatio(1f)
-        ){
-            ContentImageItem(
-                content = styleList[0],
-                onImageClick = { onContentClick(styleList[0].linkURL) },
-                modifier = Modifier.weight(2f)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+        if (styleList.size > 2) {
+            Row(
+                modifier = Modifier.aspectRatio(1f)
+            ){
                 ContentImageItem(
-                    content = styleList[1],
-                    onImageClick = { onContentClick(styleList[1].linkURL) }
+                    content = styleList[0],
+                    onImageClick = { onContentClick(styleList[0].linkURL) },
+                    modifier = Modifier.weight(2f)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                ContentImageItem(
-                    content = styleList[2],
-                    onImageClick = { onContentClick(styleList[2].linkURL) }
-                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    ContentImageItem(
+                        content = styleList[1],
+                        onImageClick = { onContentClick(styleList[1].linkURL) }
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    ContentImageItem(
+                        content = styleList[2],
+                        onImageClick = { onContentClick(styleList[2].linkURL) }
+                    )
+                }
             }
         }
 
@@ -55,6 +58,7 @@ fun StyleComponent(
         LazyVerticalGrid(
             columns = GridCells.Fixed(GRID_COLUMN_DEFAULT),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
+            userScrollEnabled = false,
             modifier = modifier.heightIn(max = 1000.dp)
         ) {
             items(
