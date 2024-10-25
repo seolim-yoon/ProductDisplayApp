@@ -11,6 +11,14 @@ import com.example.productdisplayapp.uimodel.ComponentUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+
+interface ComponentUiEffect {
+    object ShowToastMsg: ComponentUiEffect
+}
 
 data class ComponentUiState(
     val components: List<ComponentUiModel> = listOf()
@@ -22,17 +30,22 @@ class MainViewModel@AssistedInject constructor(
     private val componentUiMapper: ComponentUiMapper
 ) : MavericksViewModel<ComponentUiState>(initialState) {
 
+    private val _effect : Channel<ComponentUiEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+
     init {
         getComponentList()
     }
 
     private fun getComponentList() {
-
-        suspend {
+        viewModelScope.launch {
             getComponentListUseCase()
-        }.execute {
-            // TODO : 에러 처리
-            copy(components = componentUiMapper.mapToComponentUiModel(it() ?: listOf()))
+                .catch {
+                    _effect.send(ComponentUiEffect.ShowToastMsg)
+                }
+                .setOnEach { componentList ->
+                    copy(components = componentUiMapper.mapToComponentUiModel(componentList))
+                }
         }
     }
 

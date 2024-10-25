@@ -1,9 +1,12 @@
 package com.example.productdisplayapp.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -18,12 +21,12 @@ fun StyleComponent(
     modifier: Modifier = Modifier
 ) {
     FirstItemSpanGrid(
-        columns = 4,
+        columns = 3,
         modifier = modifier
             .wrapContentHeight()
             .heightIn(max = 2000.dp)
     ) {
-        styleList.forEachIndexed { index, style ->
+        styleList.forEach { style ->
             ContentImageItem(
                 content = style,
                 onImageClick = { onContentClick(style.linkURL) }
@@ -90,11 +93,11 @@ fun FirstItemSpanGrid(
                         spanScopeY = (index / (extraGridColumn)) * baseHeight
                     } else{
                         if ((extraGridColumn) == 1) {
-                            // 첫 시작이 아니고,  잔여 grid 처리 영역이 1일 경우
+                            // 잔여 grid 처리 영역이 1일 경우
                             spanScopeX = GRID_SPAN_FIRST * baseWidth
                             spanScopeY = (index - 1) * baseHeight
                         } else {
-                            // 첫 시작이 아니고,  잔여 grid 처리 영역이 1 이상일 경우, x값 누적
+                            // 잔여 grid 처리 영역이 1 이상일 경우, x값 누적
                             spanScopeX += span * baseWidth
                         }
                     }
