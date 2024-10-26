@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.productdisplayapp.uimodel.BannerUiModel
+import com.example.productdisplayapp.util.BANNER_AUTO_SWIPE
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -35,6 +40,17 @@ fun BannerComponent(
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(pageCount = { bannerList.size })
+
+    LaunchedEffect(key1 = pagerState.currentPage) {
+        while (true) {
+            delay(BANNER_AUTO_SWIPE)
+            withContext(NonCancellable) {
+                pagerState.scrollToPage(
+                    page = (pagerState.currentPage + 1)
+                )
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -57,7 +73,7 @@ fun BannerComponent(
 
         BannerIndicator(
             currentIdx = pagerState.currentPage + 1,
-            totalCount = pagerState.pageCount,
+            totalCount = bannerList.size,
             modifier =  Modifier.align(Alignment.BottomEnd)
         )
     }
@@ -98,7 +114,8 @@ fun BannerTitle(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .padding(bottom = 50.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom

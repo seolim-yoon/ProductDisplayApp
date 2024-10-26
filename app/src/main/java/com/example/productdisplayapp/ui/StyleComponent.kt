@@ -59,7 +59,7 @@ fun StyleComponent(
             columns = GridCells.Fixed(GRID_COLUMN_DEFAULT),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             userScrollEnabled = false,
-            modifier = modifier.heightIn(max = 1000.dp)
+            modifier = modifier.heightIn(max = 2000.dp)
         ) {
             items(
                 key = { style ->
