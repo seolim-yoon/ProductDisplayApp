@@ -7,7 +7,7 @@ import coil.compose.AsyncImage
 
 
 @Composable
-fun AsyncImageItem(
+internal fun AsyncImageItem(
     url: String,
     modifier: Modifier = Modifier
 ) {

@@ -20,7 +20,7 @@ import com.example.productdisplayapp.uimodel.StyleUiModel
 import com.example.productdisplayapp.util.GRID_COLUMN_DEFAULT
 
 @Composable
-fun StyleComponent(
+internal fun StyleComponent(
     styleList: List<StyleUiModel>,
     onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier

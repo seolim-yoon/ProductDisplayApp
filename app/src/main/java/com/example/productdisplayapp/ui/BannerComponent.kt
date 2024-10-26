@@ -1,7 +1,8 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.example.productdisplayapp.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,10 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,58 +24,63 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import com.example.productdisplayapp.ui.theme.ProductDisplayAppTheme
 import com.example.productdisplayapp.uimodel.BannerUiModel
 import com.example.productdisplayapp.util.BANNER_AUTO_SWIPE
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BannerComponent(
+internal fun BannerComponent(
     bannerList: List<BannerUiModel>,
     onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val pagerState = rememberPagerState(pageCount = { bannerList.size })
+    val backgroundImagePagerState = rememberPagerState(pageCount = { bannerList.size })
+    val foregroundTitlePagerState = rememberPagerState(pageCount = { bannerList.size })
 
-    LaunchedEffect(key1 = pagerState.currentPage) {
+    LaunchedEffect(key1 = foregroundTitlePagerState.currentPage) {
         while (true) {
             delay(BANNER_AUTO_SWIPE)
             withContext(NonCancellable) {
-                pagerState.animateScrollToPage(
-                    page = (pagerState.currentPage + 1)
+                foregroundTitlePagerState.animateScrollToPage(
+                    page = (foregroundTitlePagerState.currentPage + 1)
                 )
             }
+        }
+    }
+
+    LaunchedEffect(
+        key1 = foregroundTitlePagerState.currentPage,
+        key2 = foregroundTitlePagerState.currentPageOffsetFraction
+    ) {
+        withContext(NonCancellable) {
+            backgroundImagePagerState.animateScrollToPage(
+                foregroundTitlePagerState.currentPage,
+                foregroundTitlePagerState.currentPageOffsetFraction
+            )
         }
     }
 
     Box(
         modifier = modifier
     ) {
-        HorizontalPager(
-            key = { bannerList[it].id },
-            state = pagerState,
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier.aspectRatio(1f)
-        ) { page ->
-            bannerList.getOrNull(page)?.let { banner ->
-                BannerItem(
-                    banner = banner,
-                    onBannerClick = {
-                        onContentClick(banner.linkURL)
-                    }
-                )
-            }
-        }
-
+        BackgroundImagePager(
+            bannerList = bannerList,
+            backgroundImagePagerState = backgroundImagePagerState
+        )
+        ForegroundTitlePager(
+            bannerList = bannerList,
+            foregroundTitlePagerState = foregroundTitlePagerState,
+            onContentClick = onContentClick
+        )
         BannerIndicator(
-            currentIdx = pagerState.currentPage + 1,
+            currentIdx = foregroundTitlePagerState.currentPage + 1,
             totalCount = bannerList.size,
             modifier =  Modifier.align(Alignment.BottomEnd)
         )
@@ -80,35 +88,66 @@ fun BannerComponent(
 }
 
 @Composable
-fun BannerItem(
-    banner: BannerUiModel,
-    onBannerClick: () -> Unit,
+internal fun BackgroundImagePager(
+    bannerList: List<BannerUiModel>,
+    backgroundImagePagerState: PagerState,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.clickable {
-            onBannerClick()
-        }
-    ) {
-        Image(
-            rememberAsyncImagePainter(
-                model = banner.thumbnailURL
-            ),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        BannerTitle(
-            title = banner.title,
-            description = banner.description,
-            modifier = Modifier.align(Alignment.BottomCenter)
+    HorizontalPager(
+        key = { bannerList[it].id },
+        state = backgroundImagePagerState,
+        modifier = modifier
+    ) { page ->
+        val imageOffset = backgroundImagePagerState.currentPageOffsetFraction
+        AsyncImageItem(
+            url = bannerList[page].thumbnailURL,
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    val parallaxFactor = 0.2f
+                    translationX = imageOffset * size.width * parallaxFactor
+                }
         )
     }
 }
 
 @Composable
-fun BannerTitle(
+internal fun ForegroundTitlePager(
+    bannerList: List<BannerUiModel>,
+    foregroundTitlePagerState: PagerState,
+    onContentClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    HorizontalPager(
+        key = { bannerList[it].id },
+        state = foregroundTitlePagerState,
+        verticalAlignment = Alignment.Bottom,
+        modifier = modifier.aspectRatio(1f)
+    ) { page ->
+        val titleOffset = foregroundTitlePagerState.currentPageOffsetFraction
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val parallaxFactor = 0.5f
+                    translationX = titleOffset * size.width * parallaxFactor
+                }
+                .clickable {
+                    onContentClick(bannerList[page].linkURL)
+                }
+        ) {
+            BannerTitle(
+                title = bannerList[page].title,
+                description = bannerList[page].description,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
+    }
+}
+
+@Composable
+internal fun BannerTitle(
     title: String,
     description: String,
     modifier: Modifier = Modifier
@@ -140,7 +179,7 @@ fun BannerTitle(
 }
 
 @Composable
-fun BannerIndicator(
+internal fun BannerIndicator(
     currentIdx: Int,
     totalCount: Int,
     modifier: Modifier = Modifier
@@ -159,7 +198,7 @@ fun BannerIndicator(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewBannerItem() {
+private fun PreviewBannerItem() {
     val banner = BannerUiModel(
         id = 1,
         linkURL = "https://www.musinsa.com/app/campaign/index/junebeautyfull",
@@ -168,8 +207,11 @@ fun PreviewBannerItem() {
         description = "최대 30% 할인",
         keyword = "세일"
     )
-    BannerItem(
-        banner = banner,
-        onBannerClick = {}
-    )
+
+    ProductDisplayAppTheme {
+        BannerComponent(
+            bannerList = listOf(banner),
+            onContentClick = { },
+        )
+    }
 }

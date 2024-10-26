@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.domain.util.ContentType
 import com.example.domain.util.FooterType
@@ -30,7 +31,7 @@ import com.example.productdisplayapp.uimodel.StyleUiModel
 
 
 @Composable
-fun ComponentScreen(
+internal fun ComponentScreen(
     state: ComponentUiState,
     onEvent: (ComponentEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -53,7 +54,7 @@ fun ComponentScreen(
 }
 
 @Composable
-fun ComponentListScreen(
+internal fun ComponentListScreen(
     state: ComponentUiState,
     onEvent: (ComponentEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -90,7 +91,7 @@ fun ComponentListScreen(
 }
 
 @Composable
-fun ComponentItem(
+internal fun ComponentItem(
     component: ComponentUiModel,
     onContentClick: (String) -> Unit,
     onFooterClick: (FooterType) -> Unit
@@ -145,7 +146,7 @@ fun ComponentItem(
 }
 
 @Composable
-fun ErrorScreen(
+internal fun ErrorScreen(
     errorMessage: String
 ) {
     Column(
@@ -164,4 +165,10 @@ fun ErrorScreen(
             modifier = Modifier.padding(15.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewErrorScreen() {
+    ErrorScreen(errorMessage = "에러 발생!")
 }

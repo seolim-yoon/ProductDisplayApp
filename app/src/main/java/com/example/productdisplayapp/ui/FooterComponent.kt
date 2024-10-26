@@ -7,19 +7,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.example.domain.util.FooterType
+import com.example.productdisplayapp.ui.theme.ProductDisplayAppTheme
 import com.example.productdisplayapp.uimodel.FooterUiModel
 
 @Composable
-fun FooterComponent(
+internal fun FooterComponent(
     footer: FooterUiModel,
     onFooterClick: (FooterType) -> Unit,
     modifier: Modifier = Modifier
@@ -41,9 +48,16 @@ fun FooterComponent(
     ) {
 
         if (footer.footerType == FooterType.REFRESH) {
-            AsyncImageItem(
-                url = footer.iconURL
-            )
+            if (LocalInspectionMode.current) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null
+                )
+            } else {
+                AsyncImageItem(
+                    url = footer.iconURL
+                )
+            }
         }
 
         Text(
@@ -56,13 +70,30 @@ fun FooterComponent(
 
 @Preview (showBackground = true)
 @Composable
-fun PreviewFooterItem() {
-    FooterComponent(
-        footer = FooterUiModel(
-            title = "새로운 추천",
-            iconURL = "https://image.msscdn.net/icons/mobile/clock.png",
-            footerType = FooterType.REFRESH
-        ),
-        onFooterClick = {}
-    )
+private fun PreviewFooterItem(@PreviewParameter(FooterItemParameterProvider::class) footer: FooterUiModel) {
+    ProductDisplayAppTheme {
+        FooterComponent(
+            footer = footer,
+            onFooterClick = {}
+        )
+    }
 }
+
+private class FooterItemParameterProvider(
+    override val values: Sequence<FooterUiModel> = sequenceOf(
+        refreshCase,
+        moreCase
+    )
+): PreviewParameterProvider<FooterUiModel>
+
+private val refreshCase = FooterUiModel(
+    title = "새로운 추천",
+    iconURL = "https://image.msscdn.net/icons/mobile/clock.png",
+    footerType = FooterType.REFRESH
+)
+
+private val moreCase = FooterUiModel(
+    title = "더보기",
+    iconURL = "https://image.msscdn.net/icons/mobile/clock.png",
+    footerType = FooterType.MORE
+)
