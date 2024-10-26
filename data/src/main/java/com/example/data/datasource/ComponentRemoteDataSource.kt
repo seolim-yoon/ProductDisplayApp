@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface ComponentRemoteDataSource {
     suspend fun getComponentList(): Flow<ComponentDTO>
+
+    suspend fun getMockComponentList(): Flow<ComponentDTO>
 }

@@ -45,7 +45,7 @@ fun BannerComponent(
         while (true) {
             delay(BANNER_AUTO_SWIPE)
             withContext(NonCancellable) {
-                pagerState.scrollToPage(
+                pagerState.animateScrollToPage(
                     page = (pagerState.currentPage + 1)
                 )
             }
