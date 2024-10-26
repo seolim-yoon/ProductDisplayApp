@@ -23,15 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.productdisplayapp.R
-import com.example.productdisplayapp.uimodel.ContentUiModel
 import com.example.productdisplayapp.uimodel.GoodsUiModel
 import com.example.productdisplayapp.util.GRID_COLUMN_DEFAULT
 
@@ -120,8 +117,8 @@ fun GoodsImage(
     Box(
         modifier = modifier
     ) {
-        ContentImageItem(
-            content = goods,
+        AsyncImageItem(
+            url = goods.thumbnailURL,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -171,23 +168,6 @@ fun GoodsInfo(
             modifier = Modifier.padding(end = 5.dp)
         )
     }
-}
-
-@Composable
-fun ContentImageItem(
-    content: ContentUiModel,
-    onImageClick:() -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    AsyncImage(
-        model = content.thumbnailURL,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-            .clickable {
-                onImageClick()
-            }
-    )
 }
 
 @Composable

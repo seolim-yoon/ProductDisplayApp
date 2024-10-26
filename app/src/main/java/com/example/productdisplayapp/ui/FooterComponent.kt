@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.domain.util.FooterType
 import com.example.productdisplayapp.uimodel.FooterUiModel
 
@@ -44,9 +43,8 @@ fun FooterComponent(
     ) {
 
         if (footer.footerType == FooterType.REFRESH) {
-            AsyncImage(
-                model = footer.iconURL,
-                contentDescription = null
+            AsyncImageItem(
+                url = footer.iconURL
             )
         }
 

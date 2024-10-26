@@ -3,4 +3,5 @@
     <string name="coupon">쿠폰</string>
     <string name="price_won">%,d원</string>
     <string name="sale_rate">%d%%</string>
+    <string name="all">전체</string>
 </resources>

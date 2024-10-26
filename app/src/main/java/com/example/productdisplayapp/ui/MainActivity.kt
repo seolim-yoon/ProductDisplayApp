@@ -112,11 +112,6 @@ fun ComponentItem(
     if (component.headerUiModel.title.isNotEmpty()) {
         HeaderComponent(
             header = component.headerUiModel,
-//            header = HeaderUiModel(
-//                title = "클리어런스",
-//                iconURL = "https://image.msscdn.net/icons/mobile/clock.png",
-//                linkURL = ""
-//            ),
             onHeaderClick = onContentClick
         )
     }

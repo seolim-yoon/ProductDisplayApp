@@ -1,5 +1,6 @@
 package com.example.productdisplayapp.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,24 +32,31 @@ fun StyleComponent(
         if (styleList.size > 2) {
             Row(
                 modifier = Modifier.aspectRatio(1f)
-            ){
-                ContentImageItem(
-                    content = styleList[0],
-                    onImageClick = { onContentClick(styleList[0].linkURL) },
-                    modifier = Modifier.weight(2f)
+            ) {
+                AsyncImageItem(
+                    url = styleList[0].thumbnailURL,
+                    modifier = Modifier
+                        .weight(2f)
+                        .clickable {
+                            onContentClick(styleList[0].linkURL)
+                        }
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    ContentImageItem(
-                        content = styleList[1],
-                        onImageClick = { onContentClick(styleList[1].linkURL) }
+                    AsyncImageItem(
+                        url = styleList[1].thumbnailURL,
+                        modifier = Modifier.clickable {
+                            onContentClick(styleList[1].linkURL)
+                        },
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    ContentImageItem(
-                        content = styleList[2],
-                        onImageClick = { onContentClick(styleList[2].linkURL) }
+                    AsyncImageItem(
+                        url = styleList[2].thumbnailURL,
+                        modifier = Modifier.clickable {
+                            onContentClick(styleList[2].linkURL)
+                        },
                     )
                 }
             }
@@ -67,9 +75,11 @@ fun StyleComponent(
                 },
                 items = styleList.drop(3)
             ) { style ->
-                ContentImageItem(
-                    content = style,
-                    onImageClick = { onContentClick(style.linkURL) }
+                AsyncImageItem(
+                    url = style.thumbnailURL,
+                    modifier = Modifier.clickable {
+                        onContentClick(style.linkURL)
+                    }
                 )
             }
         }
