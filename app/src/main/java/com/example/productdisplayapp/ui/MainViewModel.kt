@@ -17,18 +17,19 @@ import com.example.productdisplayapp.util.GRID_ROW_DEFAULT
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-interface ComponentUiEffect {
-    data class ShowToastMsg(val errorMsg: String): ComponentUiEffect
+sealed interface ComponentEvent {
+    data class Refresh(val type: ContentType): ComponentEvent
+    data class LoadMore(val type: ContentType): ComponentEvent
 }
 
 data class ComponentUiState(
-    val displayComponents: List<ComponentUiModel> = listOf()
+    val displayComponents: List<ComponentUiModel> = listOf(),
+    val errorMessage: Throwable? = null
 ) : MavericksState
+
 
 class MainViewModel@AssistedInject constructor(
     @Assisted initialState: ComponentUiState,
@@ -39,9 +40,6 @@ class MainViewModel@AssistedInject constructor(
     private val defaultDisplayItemCount: Int = GRID_COLUMN_DEFAULT * GRID_ROW_DEFAULT
     private val componentList: MutableList<ComponentUiModel> = mutableListOf()
 
-    private val _effect : Channel<ComponentUiEffect> = Channel()
-    val effect = _effect.receiveAsFlow()
-
     init {
         getComponentList()
     }
@@ -50,7 +48,9 @@ class MainViewModel@AssistedInject constructor(
         viewModelScope.launch {
             getComponentListUseCase()
                 .catch { e ->
-                    _effect.send(ComponentUiEffect.ShowToastMsg(errorMsg = e.message.orEmpty()))
+                    setState {
+                        copy(errorMessage = e)
+                    }
                 }
                 .execute { async ->
                     val components = componentUiMapper.mapToComponentUiModel(async() ?: listOf())
@@ -70,17 +70,22 @@ class MainViewModel@AssistedInject constructor(
                         }
 
                         is Fail -> {
-                            _effect.trySend(ComponentUiEffect.ShowToastMsg(errorMsg = async.error.message.orEmpty()))
-                            copy()
+                            copy(errorMessage = errorMessage)
                         }
-
                         else -> copy()
                     }
                 }
         }
     }
 
-    fun refreshComponentList(type: ContentType) {
+    fun onEvent(event: ComponentEvent) {
+        when(event) {
+            is ComponentEvent.Refresh -> refreshComponentList(event.type)
+            is ComponentEvent.LoadMore -> loadMoreComponentList(event.type)
+        }
+    }
+
+    private fun refreshComponentList(type: ContentType) {
         withState { state ->
             val shuffledComponents = state.displayComponents.map { component ->
                 if (component.contentType == type) {
@@ -97,7 +102,7 @@ class MainViewModel@AssistedInject constructor(
         }
     }
 
-    fun loadMoreComponentList(type: ContentType) {
+    private fun loadMoreComponentList(type: ContentType) {
         withState { state ->
             val displayContentListSize = state.displayComponents.find { it.contentType == type }?.contentList?.size ?: 0
             val updateDisplayContentListSize = displayContentListSize + GRID_COLUMN_DEFAULT
