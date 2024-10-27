@@ -1,10 +1,8 @@
 package com.example.productdisplayapp.ui
 
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.example.domain.usecase.GetComponentListUseCase
@@ -17,7 +15,6 @@ import com.example.productdisplayapp.util.GRID_ROW_DEFAULT
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 sealed interface ComponentEvent {
@@ -46,35 +43,28 @@ class MainViewModel@AssistedInject constructor(
 
     private fun getComponentList() {
         viewModelScope.launch {
-            getComponentListUseCase()
-                .catch { e ->
-                    setState {
-                        copy(errorMessage = e)
-                    }
-                }
-                .execute { async ->
-                    val components = componentUiMapper.mapToComponentUiModel(async() ?: listOf())
-                    when (async) {
-                        is Success -> {
-                            componentList.addAll(components)
-                            copy(
-                                displayComponents = components.map { component ->
-                                    when (component.contentType) {
-                                        ContentType.GRID, ContentType.STYLE -> component.copy(
-                                            contentList = component.contentList.take(defaultDisplayItemCount)
-                                        )
-                                        else -> component
-                                    }
-                                }
-                            )
-                        }
+            try {
+                val componentEntityList = getComponentListUseCase()
+                val componentUiModelList = componentUiMapper.mapToComponentUiModel(componentEntityList)
+                componentList.addAll(componentUiModelList)
+                setState {
+                    copy(
+                        displayComponents = componentUiModelList.map { component ->
+                            when (component.contentType) {
+                                ContentType.GRID, ContentType.STYLE -> component.copy(
+                                    contentList = component.contentList.take(defaultDisplayItemCount)
+                                )
 
-                        is Fail -> {
-                            copy(errorMessage = errorMessage)
+                                else -> component
+                            }
                         }
-                        else -> copy()
-                    }
+                    )
                 }
+            } catch (e: Exception) {
+                setState {
+                    copy(errorMessage = e)
+                }
+            }
         }
     }
 

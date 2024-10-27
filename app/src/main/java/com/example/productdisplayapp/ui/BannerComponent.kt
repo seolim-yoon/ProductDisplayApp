@@ -34,6 +34,7 @@ import com.example.productdisplayapp.util.BANNER_AUTO_SWIPE
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.math.abs
 
 @Composable
 internal fun BannerComponent(
@@ -47,9 +48,14 @@ internal fun BannerComponent(
     LaunchedEffect(key1 = foregroundTitlePagerState.currentPage) {
         while (true) {
             delay(BANNER_AUTO_SWIPE)
+            if (foregroundTitlePagerState.currentPageOffsetFraction > 0.0f)
+                continue
             withContext(NonCancellable) {
                 foregroundTitlePagerState.animateScrollToPage(
                     page = (foregroundTitlePagerState.currentPage + 1)
+                )
+                backgroundImagePagerState.animateScrollToPage(
+                    page = (foregroundTitlePagerState.currentPage)
                 )
             }
         }
@@ -80,7 +86,7 @@ internal fun BannerComponent(
             onContentClick = onContentClick
         )
         BannerIndicator(
-            currentIdx = foregroundTitlePagerState.currentPage + 1,
+            currentIdx = backgroundImagePagerState.currentPage + 1,
             totalCount = bannerList.size,
             modifier =  Modifier.align(Alignment.BottomEnd)
         )
@@ -96,16 +102,17 @@ internal fun BackgroundImagePager(
     HorizontalPager(
         key = { bannerList[it].id },
         state = backgroundImagePagerState,
-        modifier = modifier
+        beyondBoundsPageCount = 1,
+        modifier = modifier,
     ) { page ->
-        val imageOffset = backgroundImagePagerState.currentPageOffsetFraction
+        val parallaxFactor = 0.3f
+
         AsyncImageItem(
             url = bannerList[page].thumbnailURL,
             modifier = Modifier
                 .fillMaxWidth()
                 .graphicsLayer {
-                    val parallaxFactor = 0.2f
-                    translationX = imageOffset * size.width * parallaxFactor
+                    translationX = abs(backgroundImagePagerState.currentPageOffsetFraction) * size.width * parallaxFactor
                 }
         )
     }
@@ -124,14 +131,13 @@ internal fun ForegroundTitlePager(
         verticalAlignment = Alignment.Bottom,
         modifier = modifier.aspectRatio(1f)
     ) { page ->
-        val titleOffset = foregroundTitlePagerState.currentPageOffsetFraction
+        val parallaxFactor = 0.5f
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    val parallaxFactor = 0.5f
-                    translationX = titleOffset * size.width * parallaxFactor
+                    translationX = abs(foregroundTitlePagerState.currentPageOffsetFraction) * size.width * parallaxFactor
                 }
                 .clickable {
                     onContentClick(bannerList[page].linkURL)
