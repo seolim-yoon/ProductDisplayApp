@@ -42,13 +42,14 @@ internal fun BannerComponent(
     onContentClick:(String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backgroundImagePagerState = rememberPagerState(pageCount = { bannerList.size })
-    val foregroundTitlePagerState = rememberPagerState(pageCount = { bannerList.size })
+    val pageCount = Int.MAX_VALUE
+    val backgroundImagePagerState = rememberPagerState(pageCount = { pageCount })
+    val foregroundTitlePagerState = rememberPagerState(pageCount = { pageCount })
 
     LaunchedEffect(key1 = foregroundTitlePagerState.currentPage) {
         while (true) {
             delay(BANNER_AUTO_SWIPE)
-            if (foregroundTitlePagerState.currentPageOffsetFraction > 0.0f)
+            if (abs(foregroundTitlePagerState.currentPageOffsetFraction) > 0.0f)
                 continue
             withContext(NonCancellable) {
                 foregroundTitlePagerState.animateScrollToPage(
@@ -86,7 +87,7 @@ internal fun BannerComponent(
             onContentClick = onContentClick
         )
         BannerIndicator(
-            currentIdx = backgroundImagePagerState.currentPage + 1,
+            currentIdx = (backgroundImagePagerState.currentPage % bannerList.size) + 1,
             totalCount = bannerList.size,
             modifier =  Modifier.align(Alignment.BottomEnd)
         )
@@ -100,15 +101,15 @@ internal fun BackgroundImagePager(
     modifier: Modifier = Modifier
 ) {
     HorizontalPager(
-        key = { bannerList[it].id },
+        key = { bannerList[it % bannerList.size].id },
         state = backgroundImagePagerState,
-        beyondBoundsPageCount = 1,
+        beyondViewportPageCount = 1,
         modifier = modifier,
     ) { page ->
         val parallaxFactor = 0.3f
 
         AsyncImageItem(
-            url = bannerList[page].thumbnailURL,
+            url = bannerList[page % bannerList.size].thumbnailURL,
             modifier = Modifier
                 .fillMaxWidth()
                 .graphicsLayer {
@@ -126,12 +127,13 @@ internal fun ForegroundTitlePager(
     modifier: Modifier = Modifier
 ) {
     HorizontalPager(
-        key = { bannerList[it].id },
+        key = { bannerList[it % bannerList.size].id },
         state = foregroundTitlePagerState,
         verticalAlignment = Alignment.Bottom,
         modifier = modifier.aspectRatio(1f)
     ) { page ->
         val parallaxFactor = 0.5f
+        val itemIdx = page % bannerList.size
 
         Box(
             modifier = Modifier
@@ -140,12 +142,12 @@ internal fun ForegroundTitlePager(
                     translationX = abs(foregroundTitlePagerState.currentPageOffsetFraction) * size.width * parallaxFactor
                 }
                 .clickable {
-                    onContentClick(bannerList[page].linkURL)
+                    onContentClick(bannerList[itemIdx].linkURL)
                 }
         ) {
             BannerTitle(
-                title = bannerList[page].title,
-                description = bannerList[page].description,
+                title = bannerList[itemIdx].title,
+                description = bannerList[itemIdx].description,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
