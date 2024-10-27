@@ -22,11 +22,15 @@ sealed interface ComponentEvent {
     data class LoadMore(val type: ContentType): ComponentEvent
 }
 
-data class ComponentUiState(
-    val displayComponents: List<ComponentUiModel> = listOf(),
-    val errorMessage: Throwable? = null
-) : MavericksState
+sealed interface LoadState {
+    data object Loading : LoadState
+    data class Success(val displayComponents: List<ComponentUiModel>) : LoadState
+    data class Error(val error: Throwable): LoadState
+}
 
+data class ComponentUiState(
+    val loadState: LoadState = LoadState.Loading
+) : MavericksState
 
 class MainViewModel@AssistedInject constructor(
     @Assisted initialState: ComponentUiState,
@@ -43,26 +47,37 @@ class MainViewModel@AssistedInject constructor(
 
     private fun getComponentList() {
         viewModelScope.launch {
+            setState {
+                copy(
+                    loadState = LoadState.Loading
+                )
+            }
             try {
                 val componentEntityList = getComponentListUseCase()
                 val componentUiModelList = componentUiMapper.mapToComponentUiModel(componentEntityList)
                 componentList.addAll(componentUiModelList)
                 setState {
                     copy(
-                        displayComponents = componentUiModelList.map { component ->
-                            when (component.contentType) {
-                                ContentType.GRID, ContentType.STYLE -> component.copy(
-                                    contentList = component.contentList.take(defaultDisplayItemCount)
-                                )
+                        loadState = LoadState.Success(
+                            displayComponents = componentUiModelList.map { component ->
+                                when (component.contentType) {
+                                    ContentType.GRID, ContentType.STYLE -> component.copy(
+                                        contentList = component.contentList.take(defaultDisplayItemCount)
+                                    )
 
-                                else -> component
+                                    else -> component
+                                }
                             }
-                        }
+                        )
                     )
                 }
             } catch (e: Exception) {
                 setState {
-                    copy(errorMessage = e)
+                    copy(
+                        loadState = LoadState.Error(
+                            error = e
+                        ) 
+                    )
                 }
             }
         }
@@ -77,42 +92,55 @@ class MainViewModel@AssistedInject constructor(
 
     private fun refreshComponentList(type: ContentType) {
         withState { state ->
-            val shuffledComponents = state.displayComponents.map { component ->
-                if (component.contentType == type) {
-                    component.copy(
-                        contentList = component.contentList.shuffled()
-                    )
-                } else {
-                    component
+            if (state.loadState is LoadState.Success) {
+                val shuffledComponents = state.loadState.displayComponents.map { component ->
+                    if (component.contentType == type) {
+                        component.copy(
+                            contentList = component.contentList.shuffled()
+                        )
+                    } else {
+                        component
+                    }
                 }
-            }
-            setState {
-                copy(displayComponents = shuffledComponents)
+                setState {
+                    copy(
+                        loadState = LoadState.Success(
+                            displayComponents = shuffledComponents
+                        )
+                    )
+                }
             }
         }
     }
 
     private fun loadMoreComponentList(type: ContentType) {
         withState { state ->
-            val displayContentListSize = state.displayComponents.find { it.contentType == type }?.contentList?.size ?: 0
-            val updateDisplayContentListSize = displayContentListSize + GRID_COLUMN_DEFAULT
+            if (state.loadState is LoadState.Success) {
+                val currentDisplayComponents = state.loadState.displayComponents
+                val currentDisplayContentListSize = currentDisplayComponents.find { it.contentType == type }?.contentList?.size ?: 0
+                val updateDisplayContentListSize = currentDisplayContentListSize + GRID_COLUMN_DEFAULT
 
-            val allContentList = componentList.find { it.contentType == type }?.contentList
+                val allContentList = componentList.find { it.contentType == type }?.contentList
+                val updateContentList = allContentList?.take(updateDisplayContentListSize) ?: listOf()
 
-            val displayComponents = state.displayComponents.map { component ->
-                if (component.contentType == type) {
-                    component.copy(
-                        contentList = allContentList?.take(updateDisplayContentListSize) ?: listOf(),
-                        footerUiModel = if (updateDisplayContentListSize >= (allContentList?.size ?: 0)) {
-                            component.footerUiModel.copy(footerType = FooterType.NONE)
-                        } else component.footerUiModel
+                val displayComponents = currentDisplayComponents.map { component ->
+                    if (component.contentType == type) {
+                        component.copy(
+                            contentList = updateContentList,
+                            footerUiModel = if (updateDisplayContentListSize >= (allContentList?.size ?: 0)) {
+                                component.footerUiModel.copy(footerType = FooterType.NONE)
+                            } else component.footerUiModel
+                        )
+                    } else
+                        component
+                }
+                setState {
+                    copy(
+                        loadState = LoadState.Success(
+                            displayComponents = displayComponents
+                        )
                     )
-                } else
-                    component
-            }
-
-            setState {
-              copy(displayComponents = displayComponents)
+                }
             }
         }
     }

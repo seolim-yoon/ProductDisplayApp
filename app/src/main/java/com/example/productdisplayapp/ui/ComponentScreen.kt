@@ -2,7 +2,9 @@ package com.example.productdisplayapp.ui
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,12 +15,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,25 +33,28 @@ import com.example.productdisplayapp.uimodel.ComponentUiModel
 import com.example.productdisplayapp.uimodel.GoodsUiModel
 import com.example.productdisplayapp.uimodel.StyleUiModel
 
-
 @Composable
 internal fun ComponentScreen(
     state: ComponentUiState,
     onEvent: (ComponentEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when {
-        state.displayComponents.isNotEmpty() -> {
+    when (state.loadState) {
+        is LoadState.Loading -> {
+            LoadingScreen()
+        }
+
+        is LoadState.Success -> {
             ComponentListScreen(
-                state = state,
+                componentList = state.loadState.displayComponents,
                 onEvent = onEvent,
                 modifier = modifier
             )
         }
 
-        state.errorMessage != null -> {
+        is LoadState.Error -> {
             ErrorScreen(
-                errorMessage = state.errorMessage.message.toString()
+                errorMessage = state.loadState.error.message.toString()
             )
         }
     }
@@ -55,7 +62,7 @@ internal fun ComponentScreen(
 
 @Composable
 internal fun ComponentListScreen(
-    state: ComponentUiState,
+    componentList: List<ComponentUiModel>,
     onEvent: (ComponentEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -66,7 +73,7 @@ internal fun ComponentListScreen(
     ) {
         items(
             contentType = { component -> component.contentType },
-            items = state.displayComponents
+            items = componentList
         ) { component ->
 
             ComponentItem(
@@ -146,6 +153,19 @@ internal fun ComponentItem(
 }
 
 @Composable
+internal fun LoadingScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(
+                color = Color.White
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
 internal fun ErrorScreen(
     errorMessage: String
 ) {
@@ -165,6 +185,12 @@ internal fun ErrorScreen(
             modifier = Modifier.padding(15.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewLoadingScreen() {
+    LoadingScreen()
 }
 
 @Preview(showBackground = true)
