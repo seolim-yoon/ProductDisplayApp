@@ -1,21 +1,15 @@
-@file:OptIn(ExperimentalFoundationApi::class)
 
 package com.example.productdisplayapp.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,109 +36,57 @@ internal fun BannerComponent(
     onContentClick:(String) -> Unit
 ) {
     val pageCount = Int.MAX_VALUE
-    val backgroundImagePagerState = rememberPagerState(pageCount = { pageCount })
-    val foregroundTitlePagerState = rememberPagerState(pageCount = { pageCount })
+    val pagerState = rememberPagerState(pageCount = { pageCount })
 
-    LaunchedEffect(key1 = foregroundTitlePagerState.currentPage) {
+    LaunchedEffect(key1 = pagerState.currentPage) {
         while (true) {
             delay(BANNER_AUTO_SWIPE)
-            if (abs(foregroundTitlePagerState.currentPageOffsetFraction) > 0.0f)
-                continue
             withContext(NonCancellable) {
-                foregroundTitlePagerState.animateScrollToPage(
-                    page = (foregroundTitlePagerState.currentPage + 1)
-                )
-                backgroundImagePagerState.animateScrollToPage(
-                    page = (foregroundTitlePagerState.currentPage)
+                pagerState.animateScrollToPage(
+                    page = pagerState.currentPage + 1
                 )
             }
         }
     }
 
-    LaunchedEffect(
-        key1 = foregroundTitlePagerState.currentPage,
-        key2 = foregroundTitlePagerState.currentPageOffsetFraction
-    ) {
-        withContext(NonCancellable) {
-            backgroundImagePagerState.animateScrollToPage(
-                foregroundTitlePagerState.currentPage,
-                foregroundTitlePagerState.currentPageOffsetFraction
-            )
-        }
-    }
-
     Box {
-        BackgroundImagePager(
-            bannerList = bannerList,
-            backgroundImagePagerState = backgroundImagePagerState
-        )
-        ForegroundTitlePager(
-            bannerList = bannerList,
-            foregroundTitlePagerState = foregroundTitlePagerState,
-            onContentClick = onContentClick
-        )
+        HorizontalPager(
+            key = { bannerList[it % bannerList.size].id },
+            state = pagerState,
+            beyondViewportPageCount = 1
+        ) { page ->
+            val parallaxFactor = 0.5f
+            val itemIndex = page % bannerList.size
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable {
+                        onContentClick(bannerList[itemIndex].linkURL)
+                    }
+            ) {
+                AsyncImageItem(
+                    url = bannerList[itemIndex].thumbnailURL,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
+                BannerTitle(
+                    title = bannerList[itemIndex].title,
+                    description = bannerList[itemIndex].description,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                        .graphicsLayer {
+                            translationX = abs(pagerState.currentPageOffsetFraction) * size.width * parallaxFactor
+                        }
+                )
+            }
+        }
+
         BannerIndicator(
-            currentIdx = (backgroundImagePagerState.currentPage % bannerList.size) + 1,
+            currentIdx = (pagerState.currentPage % bannerList.size) + 1,
             totalCount = bannerList.size,
             modifier =  Modifier.align(Alignment.BottomEnd)
         )
-    }
-}
-
-@Composable
-internal fun BackgroundImagePager(
-    bannerList: List<BannerUiModel>,
-    backgroundImagePagerState: PagerState
-) {
-    HorizontalPager(
-        key = { bannerList[it % bannerList.size].id },
-        state = backgroundImagePagerState,
-        beyondViewportPageCount = 1
-    ) { page ->
-        val parallaxFactor = 0.3f
-
-        AsyncImageItem(
-            url = bannerList[page % bannerList.size].thumbnailURL,
-            modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    translationX = abs(backgroundImagePagerState.currentPageOffsetFraction) * size.width * parallaxFactor
-                }
-        )
-    }
-}
-
-@Composable
-internal fun ForegroundTitlePager(
-    bannerList: List<BannerUiModel>,
-    foregroundTitlePagerState: PagerState,
-    onContentClick: (String) -> Unit
-) {
-    HorizontalPager(
-        key = { bannerList[it % bannerList.size].id },
-        state = foregroundTitlePagerState,
-        verticalAlignment = Alignment.Bottom,
-        modifier = Modifier.aspectRatio(1f)
-    ) { page ->
-        val parallaxFactor = 0.5f
-        val itemIdx = page % bannerList.size
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    translationX = abs(foregroundTitlePagerState.currentPageOffsetFraction) * size.width * parallaxFactor
-                }
-                .clickable {
-                    onContentClick(bannerList[itemIdx].linkURL)
-                }
-        ) {
-            BannerTitle(
-                title = bannerList[itemIdx].title,
-                description = bannerList[itemIdx].description,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
     }
 }
 
