@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -69,6 +70,7 @@ internal fun ComponentListScreen(
     val context = LocalContext.current
 
     LazyColumn(
+        contentPadding = PaddingValues(bottom = 35.dp),
         modifier = modifier
     ) {
         items(
@@ -148,8 +150,6 @@ internal fun ComponentItem(
             onFooterClick = onFooterClick
         )
     }
-
-    Spacer(modifier = Modifier.height(35.dp))
 }
 
 @Composable

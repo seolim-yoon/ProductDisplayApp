@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material3.Icon
@@ -46,14 +47,13 @@ import com.example.productdisplayapp.util.GRID_COLUMN_DEFAULT
 @Composable
 internal fun GridComponent(
     goodsList: List<GoodsUiModel>,
-    onContentClick:(String) -> Unit,
-    modifier: Modifier = Modifier
+    onContentClick:(String) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(GRID_COLUMN_DEFAULT),
         contentPadding = PaddingValues(15.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.heightIn(max = 1000.dp)
+        modifier = Modifier.heightIn(max = 1000.dp)
     ) {
         items(
             key = { goods ->
@@ -74,10 +74,9 @@ internal fun GridComponent(
 @Composable
 internal fun ScrollComponent(
     goodsList: List<GoodsUiModel>,
-    onContentClick:(String) -> Unit,
-    modifier: Modifier = Modifier
+    onContentClick:(String) -> Unit
 ) {
-    val listState = remember { LazyListState() }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(key1 = goodsList) {
         listState.scrollToItem(0)
@@ -87,7 +86,7 @@ internal fun ScrollComponent(
         state = listState,
         contentPadding = PaddingValues(15.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         items(
             key = { goods ->
@@ -113,9 +112,11 @@ internal fun GoodsItem(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.clickable {
-            onGoodsClick()
-        }
+        modifier = modifier
+            .clickable {
+                onGoodsClick()
+            }
+            .padding(bottom = 15.dp)
     ) {
         GoodsImage(
             goods = goods
@@ -123,23 +124,21 @@ internal fun GoodsItem(
         GoodsInfo(
             goods = goods
         )
-        Spacer(modifier = Modifier.height(15.dp))
     }
 }
 
 @Composable
 internal fun GoodsImage(
-    goods: GoodsUiModel,
-    modifier: Modifier = Modifier
+    goods: GoodsUiModel
 ) {
-    Box(
-        modifier = modifier
-    ) {
+    Box {
         if (LocalInspectionMode.current) {
             Icon(
                 imageVector = Icons.Default.AccountBox,
                 contentDescription = null,
-                modifier = Modifier.fillMaxWidth().size(150.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(150.dp)
             )
         } else {
             AsyncImageItem(

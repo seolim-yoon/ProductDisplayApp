@@ -22,12 +22,11 @@ import com.example.productdisplayapp.util.GRID_COLUMN_DEFAULT
 @Composable
 internal fun StyleComponent(
     styleList: List<StyleUiModel>,
-    onContentClick:(String) -> Unit,
-    modifier: Modifier = Modifier
+    onContentClick:(String) -> Unit
 ) {
 
     Column(
-        modifier = modifier.padding(15.dp)
+        modifier = Modifier.padding(15.dp)
     ) {
         if (styleList.size > 2) {
             Row(
@@ -67,7 +66,7 @@ internal fun StyleComponent(
             columns = GridCells.Fixed(GRID_COLUMN_DEFAULT),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             userScrollEnabled = false,
-            modifier = modifier.heightIn(max = 2000.dp)
+            modifier = Modifier.heightIn(max = 2000.dp)
         ) {
             items(
                 key = { style ->

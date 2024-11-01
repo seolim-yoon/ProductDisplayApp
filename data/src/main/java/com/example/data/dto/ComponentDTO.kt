@@ -10,11 +10,8 @@ data class ComponentDTO(
 ) {
     @Serializable
     data class Component(
-        @SerialName("contents")
         val contents: Contents? = Contents(),
-        @SerialName("footer")
         val footer: Footer? = Footer(),
-        @SerialName("header")
         val header: Header? = Header()
     )
 }

@@ -29,11 +29,10 @@ import com.example.productdisplayapp.uimodel.HeaderUiModel
 @Composable
 internal fun HeaderComponent(
     header: HeaderUiModel,
-    onHeaderClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onHeaderClick: (String) -> Unit
 ) {
     Layout(
-        modifier = modifier
+        modifier = Modifier
             .border(
                 width = 1.dp,
                 color = Color.Gray,
@@ -47,8 +46,7 @@ internal fun HeaderComponent(
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.Black,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 

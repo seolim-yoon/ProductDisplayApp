@@ -28,13 +28,12 @@ import com.example.productdisplayapp.uimodel.FooterUiModel
 @Composable
 internal fun FooterComponent(
     footer: FooterUiModel,
-    onFooterClick: (FooterType) -> Unit,
-    modifier: Modifier = Modifier
+    onFooterClick: (FooterType) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp, horizontal = 15.dp)
             .border(

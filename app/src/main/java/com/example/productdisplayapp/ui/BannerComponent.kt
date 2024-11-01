@@ -39,8 +39,7 @@ import kotlin.math.abs
 @Composable
 internal fun BannerComponent(
     bannerList: List<BannerUiModel>,
-    onContentClick:(String) -> Unit,
-    modifier: Modifier = Modifier
+    onContentClick:(String) -> Unit
 ) {
     val pageCount = Int.MAX_VALUE
     val backgroundImagePagerState = rememberPagerState(pageCount = { pageCount })
@@ -74,9 +73,7 @@ internal fun BannerComponent(
         }
     }
 
-    Box(
-        modifier = modifier
-    ) {
+    Box {
         BackgroundImagePager(
             bannerList = bannerList,
             backgroundImagePagerState = backgroundImagePagerState
@@ -97,14 +94,12 @@ internal fun BannerComponent(
 @Composable
 internal fun BackgroundImagePager(
     bannerList: List<BannerUiModel>,
-    backgroundImagePagerState: PagerState,
-    modifier: Modifier = Modifier
+    backgroundImagePagerState: PagerState
 ) {
     HorizontalPager(
         key = { bannerList[it % bannerList.size].id },
         state = backgroundImagePagerState,
-        beyondViewportPageCount = 1,
-        modifier = modifier,
+        beyondViewportPageCount = 1
     ) { page ->
         val parallaxFactor = 0.3f
 
@@ -123,14 +118,13 @@ internal fun BackgroundImagePager(
 internal fun ForegroundTitlePager(
     bannerList: List<BannerUiModel>,
     foregroundTitlePagerState: PagerState,
-    onContentClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onContentClick: (String) -> Unit
 ) {
     HorizontalPager(
         key = { bannerList[it % bannerList.size].id },
         state = foregroundTitlePagerState,
         verticalAlignment = Alignment.Bottom,
-        modifier = modifier.aspectRatio(1f)
+        modifier = Modifier.aspectRatio(1f)
     ) { page ->
         val parallaxFactor = 0.5f
         val itemIdx = page % bannerList.size
@@ -165,17 +159,13 @@ internal fun BannerTitle(
             .fillMaxWidth()
             .padding(bottom = 50.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
+        verticalArrangement = Arrangement.spacedBy(space = 10.dp, alignment = Alignment.Bottom)
     ) {
         Text(
             text = title,
             color = Color.White,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
-        )
-
-        Spacer(
-            modifier = Modifier.height(10.dp)
         )
 
         Text(
