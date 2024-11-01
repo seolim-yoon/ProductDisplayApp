@@ -38,9 +38,6 @@ android {
 dependencies {
     implementation(project(":domain"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization.converter)
     implementation(libs.kotlin.serialization)
