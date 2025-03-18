@@ -46,16 +46,20 @@ internal fun StyleComponent(
                 ) {
                     AsyncImageItem(
                         url = styleList[1].thumbnailURL,
-                        modifier = Modifier.clickable {
-                            onContentClick(styleList[1].linkURL)
-                        },
+                        modifier = Modifier
+                            .clickable {
+                                onContentClick(styleList[1].linkURL)
+                            }
+                            .weight(1f),
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     AsyncImageItem(
                         url = styleList[2].thumbnailURL,
-                        modifier = Modifier.clickable {
-                            onContentClick(styleList[2].linkURL)
-                        },
+                        modifier = Modifier
+                            .clickable {
+                                onContentClick(styleList[2].linkURL)
+                            }
+                            .weight(1f),
                     )
                 }
             }
